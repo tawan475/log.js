@@ -9,13 +9,23 @@ module.exports = class logger {
             LogFile: LogFile || "./log.log",
             prefix: prefix || "[$DATE]"
         }
+        this.logger = this
+        return (() => {
+            let main = this;
+            function logFunction(...args) {
+                main.log(...args)
+            }
+            logFunction.dir = main.dir;
+            logFunction._logger = main;
+            return logFunction;
+        })()
     }
 
     dir(dir) {
         let dirClass = new directoryClass({
             directory: dir,
-            logger: this,
-            parent: this.log
+            logger: this._logger,
+            parent: this._logger.log
         })
         return (() => {
             function logFunction(...args) {
@@ -36,13 +46,14 @@ module.exports = class logger {
                 logs.push(arg);
             }
         }
+        if (dir.length) dir.push(":");
 
         let logArr = [];
         // add log prefix
         let prefix = this.logger.option.prefix
         prefix = prefix.replace(/\$DATE/g, Date.now());
         logArr.push(prefix);
-        logArr.push(dir.join("") + ":");
+        if (dir.length) logArr.push(dir.join(""));
         logArr.push(...logs)
 
         if (this.logger.option.consoleLog) console.log(...logArr);
