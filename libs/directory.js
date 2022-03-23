@@ -1,18 +1,26 @@
 module.exports = class directoryClass {
-    constructor({ directory, parent }) {
+    constructor({ directory, logger, parent }) {
         this.directory = directory;
+        this.logger = logger
         this.parent = parent
     }
 
     dir(dir) {
-        let options = {
+        let dirClass = new directoryClass({
             directory: dir,
+            logger: this.logger,
             parent: this
-        }
-        return new directoryClass(options);
+        })
+        return (() => {
+            function logFunction(...args) {
+                dirClass.log(...args)
+            }
+            logFunction.dir = dirClass.dir
+            return logFunction;
+        })()
     }
 
     log(...args) {
-        this.parent.log(this, ...args)
+        this.parent(this, ...args)
     }
 }

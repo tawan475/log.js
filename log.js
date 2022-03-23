@@ -12,10 +12,18 @@ module.exports = class logger {
     }
 
     dir(dir) {
-        return new directoryClass({
+        let dirClass = new directoryClass({
             directory: dir,
-            parent: this
-        });
+            logger: this,
+            parent: this.log
+        })
+        return (() => {
+            function logFunction(...args) {
+                dirClass.log(...args)
+            }
+            logFunction.dir = dirClass.dir
+            return logFunction;
+        })()
     }
 
     log(...args) {
@@ -31,14 +39,14 @@ module.exports = class logger {
 
         let logArr = [];
         // add log prefix
-        let prefix = this.option.prefix
+        let prefix = this.logger.option.prefix
         prefix = prefix.replace(/\$DATE/g, Date.now());
         logArr.push(prefix);
         logArr.push(dir.join("") + ":");
         logArr.push(...logs)
 
-        if (this.option.consoleLog) console.log(...logArr);
-        if (this.option.logToFile) this.saveLog(...logArr);
+        if (this.logger.option.consoleLog) console.log(...logArr);
+        if (this.logger.option.logToFile) this.logger.saveLog(...logArr);
         return logArr;
     }
 
