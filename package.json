@@ -1,6 +1,6 @@
 {
   "name": "@tawan475/log.js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "improved console.log!",
   "main": "log.js",
   "scripts": {
